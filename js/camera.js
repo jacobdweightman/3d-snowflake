@@ -33,6 +33,9 @@ class Camera {
         );
     }
 
+    /**
+     * Sets the uniform value `cameraPos` for the shader program.
+     */
     updateGPUCamera() {
         gl.uniform4fv(
             gl.getUniformLocation(program, 'cameraPos'),

@@ -3,14 +3,16 @@ class Mesh {
      * Initialize a 3D object in the world.
      * 
      * @param {number[]} position the location of the object in world space (vec3)
-     * @param {number[]} orientation The direction in world space of the +x axis in object
-     * space (vec3)
+     * @param {number[]} orientation The direction in world space of the +x axis in object space (vec3)
      * @param {Float32Array} vertices the vertices of the mesh, in object space
      */
     constructor(position, orientation, vertices) {
-        this.modelMatrix = Mat.translation(position);
+        this.position = Mat.translation(position);
 
-        this.orientation = orientation;
+        let axis = Vec.cross([1, 0, 0], Vec.normalize(orientation))
+        let angle = Math.asin(Vec.norm(axis));
+        this.orientation = (angle == 0) ? Mat.identity() : Mat.rotation(angle, axis);
+
         this.vertices = vertices;
 
         this.positionBuffer = gl.createBuffer();
@@ -26,7 +28,7 @@ class Mesh {
         gl.uniformMatrix4fv(
             gl.getUniformLocation(program, 'modelMatrix'),
             false,
-            this.modelMatrix.convertForGPU()
+            this.orientation.mul(this.position).convertForGPU()
         );
         
         gl.bindBuffer(gl.ARRAY_BUFFER, triangle.positionBuffer);
