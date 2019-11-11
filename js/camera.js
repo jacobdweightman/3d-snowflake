@@ -1,6 +1,17 @@
 class Camera {
-    constructor(fieldOfView, near, far) {
-        let f = Math.tan(Math.PI*0.5 - fieldOfView*0.5);
+    /**
+     * Represents a camera!
+     * 
+     * @param {number[]} position the position of the camera in world coordinates
+     * @param {number} fieldOfView the angle (in radians) that this camera is able to see
+     * @param {number} near the minimum distance that this camara can see
+     * @param {number} far the maximum distance that this camara can see
+     */
+    constructor(position, fieldOfView, near, far) {
+        this.position = new Float32Array(4);
+        this.position.set(position);
+
+        let f = Math.tan(0.5*(Math.PI - fieldOfView));
         let r = 1 / (far - near);
 
         this.projectionMatrix = new Float32Array([
@@ -20,5 +31,12 @@ class Camera {
             false,
             this.projectionMatrix
         );
+    }
+
+    updateGPUCamera() {
+        gl.uniform4fv(
+            gl.getUniformLocation(program, 'cameraPos'),
+            this.position
+        )
     }
 }

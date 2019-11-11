@@ -35,7 +35,7 @@ function initializeScene() {
     gl.enable(gl.DEPTH_TEST);           // Enable depth testing
     gl.depthFunc(gl.LEQUAL);            // Near things obscure far things
 
-    camera = new Camera(Math.PI/2, 0.1, 10);
+    camera = new Camera([0.5,0,0], Math.PI/2, 0.1, 10);
     camera.updateGPUProjectionMatrix();
 
     triangle = new Mesh(
@@ -53,5 +53,6 @@ function initializeScene() {
 function drawScene() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+    camera.updateGPUCamera();
     triangle.draw();
 }

@@ -11,6 +11,15 @@ class Mat {
         this.entries = entries
     }
 
+    static translation(v) {
+        return new Mat([
+            [1, 0, 0, v[0]],
+            [0, 1, 0, v[2]],
+            [0, 0, 1, v[2]],
+            [0, 0, 0, 1],
+        ]);
+    }
+
     /**
      * Construct and return a new matrix given by self + B
      * @param {*} B the matrix to add

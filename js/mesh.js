@@ -8,12 +8,7 @@ class Mesh {
      * @param {Float32Array} vertices the vertices of the mesh, in object space
      */
     constructor(position, orientation, vertices) {
-        this.position = new Mat([
-            [1, 0, 0, position[0]],
-            [0, 1, 0, position[1]],
-            [0, 0, 1, position[2]],
-            [0, 0, 0, 1],
-        ]);
+        this.modelMatrix = Mat.translation(position);
 
         this.orientation = orientation;
         this.vertices = vertices;
@@ -28,23 +23,22 @@ class Mesh {
     }
 
     draw() {
-        console.log(this.position.convertForGPU());
         gl.uniformMatrix4fv(
             gl.getUniformLocation(program, 'modelMatrix'),
             false,
-            this.position.convertForGPU()
+            this.modelMatrix.convertForGPU()
         );
         
         gl.bindBuffer(gl.ARRAY_BUFFER, triangle.positionBuffer);
         gl.vertexAttribPointer(
-            gl.getAttribLocation(program, 'aVertexPosition'),
+            gl.getAttribLocation(program, 'vertexMeshPos'),
             3,
             gl.FLOAT,
             true,
             0,
             0
         );
-        gl.enableVertexAttribArray(gl.getAttribLocation(program, 'aVertexPosition'))
+        gl.enableVertexAttribArray(gl.getAttribLocation(program, 'vertexMeshPos'))
 
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 3);
     }
