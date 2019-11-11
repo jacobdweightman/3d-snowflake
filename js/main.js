@@ -54,5 +54,6 @@ function drawScene() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
     camera.updateGPUCamera();
+    camera.updateGPUViewMatrix();
     triangle.draw();
 }

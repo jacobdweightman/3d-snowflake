@@ -36,10 +36,11 @@ class Camera {
     /**
      * Sets the uniform value `cameraPos` for the shader program.
      */
-    updateGPUCamera() {
-        gl.uniform4fv(
-            gl.getUniformLocation(program, 'cameraPos'),
-            this.position
+    updateGPUViewMatrix() {
+        gl.uniformMatrix4fv(
+            gl.getUniformLocation(program, 'viewMatrix'),
+            false,
+            Mat.translation(Vec.scale(this.position, -1)).convertForGPU()
         )
     }
 }
