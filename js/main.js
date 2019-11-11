@@ -5,7 +5,6 @@ var program;
 // TODO: encapsulate this better
 var camera;
 var triangle;
-var positionBuffer;
 
 function main() {
     canvas = document.getElementById("glCanvas");
@@ -23,7 +22,7 @@ function main() {
         program = prog;
         gl.useProgram(prog);
         initializeScene();
-        drawScene();
+        requestAnimationFrame(drawScene);
     });
 }
 
@@ -39,21 +38,27 @@ function initializeScene() {
     camera.updateGPUProjectionMatrix();
 
     triangle = new Mesh(
-        [0.25, 0, 0],
+        [0, 0, 0],
         [1, 0, 1],
-        new Float32Array([
+        new Float32Array([ // vertices
             -1,  1, 0,
             1,  1, 0,
             -1, -1, 0,
+        ]),
+        new Float32Array([ // normals
+            0, 0, 1,
+            0, 0, 1,
+            0, 0, 1,
         ])
     );
-    console.log(triangle);
 }
 
 function drawScene() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    camera.updateGPUCamera();
     camera.updateGPUViewMatrix();
+    triangle.rotate(0.01, [0, 1, 0]);
     triangle.draw();
+
+    requestAnimationFrame(drawScene);
 }
