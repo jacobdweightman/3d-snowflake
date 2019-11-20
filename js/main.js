@@ -46,9 +46,9 @@ function initializeScene() {
             -1, -1, 0,
         ]),
         new Float32Array([ // normals
-            0, 0, 1,
-            0, 0, 1,
-            0, 0, 1,
+            -1, 1, 1,
+            1, 1, 1,
+            -1, -1, 1,
         ])
     );
 }
