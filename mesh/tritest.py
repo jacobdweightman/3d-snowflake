@@ -27,7 +27,7 @@ pts = np.array([
 ])
 seg = np.array([[0, 1], [1, 2], [2, 3], [3,0]])
 
-A = dict(vertices=pts, segments=seg, holes=[[0, 0]])
+A = dict(vertices=pts, segments=seg)
 B = tr.triangulate(A, 'qpa0.05')
 tr.compare(plt, A, B)
 plt.show()

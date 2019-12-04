@@ -72,7 +72,7 @@ vertices.append(start)
 T = np.array([-1, 1])
 
 # 3. Until we've gone all the way around the snowflake:
-for i in range(185):
+for i in range(184):
     x,y = vertices[-1]
 
     #print("Loop ", i, ": (T=", T, ", r=", vertices[-1], ")")
@@ -84,31 +84,21 @@ for i in range(185):
     # 5. Select the candidate that is most nearly parallel to the tangent vector.
     vp = choose_candidate(candidates, T)
     
-    # If this new vertex is not "nearly colinear" with the previous one and the one
-    # before that, then the boundary is very curvy here and we should choose a closer
-    # set of candidates instead.
-    """
-    cosTheta = np.dot(T, vp) / (np.linalg.norm(T) * np.linalg.norm(vp))
-    if cosTheta < 0.5:
-        print("small")
-        candidates = get_candidates(x, y, small_mask)
-        vpindex = np.argmax([np.dot(T, u) + np.cross(T, u) for u in candidates])
-        vp = candidates[vpindex]
-    """
-
-    # 6. Select the candidate that is most nearly parallel to the tangent vector.
-    vp = choose_candidate(candidates, T)
-    
     # 7. Add
     T = vp
     vertices.append(vertices[-1] + vp)
-    #print(vertices[-1])
 
 # use symmetry to get other side of arm
 reflected = []
 for vertex in vertices[::-1]:
     reflected.append(np.array([vertex[1], vertex[0]]))
 vertices = reflected + vertices
+
+vertices = vertices[:-5:5]
+
+#del vertices[328]
+#del vertices[40:45]
+#del vertices[-1]
 
 # shear back to "hex grid"
 M = np.linalg.inv(np.array([
@@ -122,8 +112,8 @@ for i in range(len(vertices)):
 final = []
 for i in range(6):
     rot = np.array([
-        [np.cos(np.pi/3 * i), -np.sin(np.pi/3 * i)],
-        [np.sin(np.pi/3 * i), np.cos(np.pi/3 * i)]
+        [np.cos(-np.pi/3 * i), -np.sin(-np.pi/3 * i)],
+        [np.sin(-np.pi/3 * i), np.cos(-np.pi/3 * i)]
     ])
 
     next_branch = []
@@ -131,23 +121,67 @@ for i in range(6):
         next_branch.append(np.dot(rot, vertex))
     final.extend(next_branch)
 
-#cb = plt.imshow((boundary > 0) * 1.0)
-#plt.colorbar(cb)
+# check for duplicates
+print(len(final))
+vertex_set = set()
+i = 0
+while i < len(final):
+    v = tuple(final[i])
+    if v in vertex_set:
+        del final[i]
+    else:
+        vertex_set.add(v)
+        i += 1
+print(len(final))
+
+print(final[:7])
+
+segments = [(i, i+1) for i in range(len(final) - 1)]
+segments.append((len(final)-1, 0))
+
+
+#f = 0
+#L = len(vertices) - 1 #327
+
+#segments = [(i, i+1) for i in range(f, L)]
+#segments.append((L, f))
+#segments = np.array(segments)
+
+#vertices = np.array(vertices)
+final = np.array(final)
+
+
+
+A = {"vertices": final, "segments": segments}
+B = triangle.triangulate(A, 'qp')
+triangle.compare(plt, A, B)
 #X,Y = list(zip(*final))
 #plt.plot(X, Y, '.')
-#plt.show()
-
-segments = [(i, i+1) for i in range(len(vertices) - 1)]
-segments.append((len(segments)-1, 0))
-segments = np.array(segments)
-
-vertices = np.array(vertices)
-
-
-A = {"vertices": vertices, "segments": segments, "holes": [[-30,-50]]}
-B = triangle.triangulate(A, 'qFs')
-triangle.compare(plt, A, B)
 plt.show()
 
+vertices = B["vertices"]
+triangles = B["triangles"]
+
+print(vertices[:7])
+
+front_vertices = np.column_stack([vertices, np.full((vertices.shape[0], 1), 5)])
+back_vertices  = np.column_stack([vertices, np.full((vertices.shape[0], 1), -5)])
+
+back_triangles = np.column_stack([triangles[:,1], triangles[:,0], triangles[:,2]])
+
+faces = np.concatenate([triangles, back_triangles + vertices.shape[0]])
+vertices = np.concatenate([front_vertices, back_vertices])
+
+new_faces = []
+for i in range(len(final)):
+    #create triangle 1
+    new_faces.append([i, len(front_vertices) + i + 1, len(front_vertices)+i])
+    #create triangle 2
+    new_faces.append([i, i + 1, len(front_vertices) + i + 1])
+
+faces = np.concatenate([faces, np.array(new_faces)])
+
+print(front_vertices[:5])
+print(back_vertices[:5])
 #vertices, faces = meshzoo.triangle(1)
-#meshio.write_points_cells("foo.obj", vertices, {"triangle": faces})
+meshio.write_points_cells("foo.obj", vertices, {"triangle": faces})
