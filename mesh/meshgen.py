@@ -1,4 +1,3 @@
-import meshzoo
 import meshio
 import numpy as np
 import scipy.signal
@@ -20,21 +19,9 @@ laplacian = np.array([
     [0,  1, 1],
 ])
 
- # Given a point on the boundary of the snowflake, these masks suggests some neighboring
+ # Given a point on the boundary of the snowflake, mask suggests some neighboring
  # points to consider as possible next vertices.
-large_mask = np.array([
-    [0, 0, 1, 1, 1, 1, 1, 0, 0],
-    [0, 1, 1, 0, 0, 0, 1, 1, 0],
-    [1, 1, 0, 0, 0, 0, 0, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 1, 0, 0, 0, 0, 0, 1, 1],
-    [0, 1, 1, 0, 0, 0, 1, 1, 0],
-    [0, 0, 1, 1, 1, 1, 1, 0, 0],
-])
-
-small_mask = np.array([
+mask = np.array([
     [0, 1, 1, 1, 0],
     [1, 1, 0, 1, 1],
     [1, 0, 0, 0, 1],
@@ -79,7 +66,7 @@ for i in range(184):
 
     # 4. Find the points that are on both the boundary of the snowflake and the mask.
     # These are represented by their displacement from the previously found vertex.
-    candidates = get_candidates(x, y, small_mask)
+    candidates = get_candidates(x, y, mask)
 
     # 5. Select the candidate that is most nearly parallel to the tangent vector.
     vp = choose_candidate(candidates, T)
@@ -94,11 +81,9 @@ for vertex in vertices[::-1]:
     reflected.append(np.array([vertex[1], vertex[0]]))
 vertices = reflected + vertices
 
+# remove points on end of dendrite that form a loop in the boundary (makes triangle segfault)
+# and take every fifth point (so that the final mesh is smaller)
 vertices = vertices[:-5:5]
-
-#del vertices[328]
-#del vertices[40:45]
-#del vertices[-1]
 
 # shear back to "hex grid"
 M = np.linalg.inv(np.array([
@@ -109,6 +94,7 @@ offset = np.array([500, 500])
 for i in range(len(vertices)):
     vertices[i] = np.dot(M, vertices[i] - offset)
 
+# create all six dendrites by rotating the original
 final = []
 for i in range(6):
     rot = np.array([
