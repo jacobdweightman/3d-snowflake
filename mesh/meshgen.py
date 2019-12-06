@@ -83,7 +83,7 @@ vertices = reflected + vertices
 
 # remove points on end of dendrite that form a loop in the boundary (makes triangle segfault)
 # and take every fifth point (so that the final mesh is smaller)
-vertices = vertices[:-5:5]
+vertices = vertices[:-5:2]
 
 # shear back to "hex grid"
 M = np.linalg.inv(np.array([
@@ -143,27 +143,34 @@ B = triangle.triangulate(A, 'qp')
 triangle.compare(plt, A, B)
 #X,Y = list(zip(*final))
 #plt.plot(X, Y, '.')
-plt.show()
+#plt.show()
 
 vertices = B["vertices"]
 triangles = B["triangles"]
 
 print(vertices[:7])
 
-front_vertices = np.column_stack([vertices, np.full((vertices.shape[0], 1), 5)])
-back_vertices  = np.column_stack([vertices, np.full((vertices.shape[0], 1), -5)])
-
+front_vertices = np.column_stack([vertices *.7, np.full((vertices.shape[0], 1), 10)])
+back_vertices  = np.column_stack([vertices *.7, np.full((vertices.shape[0], 1), -10)])
+middle_vertices = np.column_stack([final, np.full((final.shape[0], 1), 0)])
 back_triangles = np.column_stack([triangles[:,1], triangles[:,0], triangles[:,2]])
 
 faces = np.concatenate([triangles, back_triangles + vertices.shape[0]])
-vertices = np.concatenate([front_vertices, back_vertices])
+vertices = np.concatenate([front_vertices, back_vertices, middle_vertices])
 
 new_faces = []
 for i in range(len(final)):
     #create triangle 1
-    new_faces.append([i, len(front_vertices) + i + 1, len(front_vertices)+i])
+    new_faces.append([i, len(front_vertices)*2 + i + 1, len(front_vertices)*2+i])
     #create triangle 2
-    new_faces.append([i, i + 1, len(front_vertices) + i + 1])
+    new_faces.append([i, i + 1, len(front_vertices)*2 + i + 1])
+    #create triangle 3
+    new_faces.append([i+ 2*len(front_vertices), i + len(front_vertices) + 1, i + len(front_vertices)])
+    #create triangle 4
+    new_faces.append([i+ 2*len(front_vertices), i + len(front_vertices)*2 + 1, i + len(front_vertices) + 1])
+
+
+
 
 faces = np.concatenate([faces, np.array(new_faces)])
 
