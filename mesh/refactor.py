@@ -67,8 +67,10 @@ class Snowflake:
         final = np.array(self.outline)
         triangles = self.triangles
 
-        front_vertices = np.column_stack([vertices * .7, np.full((vertices.shape[0], 1), 10)])
-        back_vertices = np.column_stack([vertices * .7, np.full((vertices.shape[0], 1), -10)])
+        noise = np.random.normal(scale=2.0, size=(vertices.shape[0], 1))
+
+        front_vertices = np.column_stack([vertices * .7, np.full((vertices.shape[0], 1), 10 + noise)])
+        back_vertices = np.column_stack([vertices * .7, np.full((vertices.shape[0], 1), -10 - noise)])
         middle_vertices = np.column_stack([final, np.full((final.shape[0], 1), 0)])
         back_triangles = np.column_stack([triangles[:, 1], triangles[:, 0], triangles[:, 2]])
 
