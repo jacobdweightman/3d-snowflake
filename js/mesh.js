@@ -81,8 +81,8 @@ export default class Mesh {
      * @param {number[]} axis the axis about which to rotate (vec3)
      * @param {number} angle the angle to rotate by
      */
-    rotate(axis, angle) {
-        this.orientation = Mat.rotation(0.01, [0, 1, 0]).mul(this.orientation);
+    rotate(angle, axis) {
+        this.orientation = Mat.rotation(angle, axis).mul(this.orientation);
     }
 
     /**
