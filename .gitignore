@@ -1,0 +1,4 @@
+.DS_Store
+
+# By default, don't check in generated meshes!
+.obj
