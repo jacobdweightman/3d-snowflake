@@ -13,8 +13,8 @@ export default class Camera {
         this.position = new Float32Array(4);
         this.position.set(position);
 
-        let f = Math.tan(0.5*(Math.PI - fieldOfView));
-        let r = 1 / (far - near);
+        let f = 1.0 / Math.tan(0.5*fieldOfView);
+        let r = 1 / (near - far);
 
         this.projectionMatrix = new Float32Array([
             f, 0, 0, 0,
