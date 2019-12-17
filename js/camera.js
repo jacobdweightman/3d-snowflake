@@ -1,4 +1,6 @@
-class Camera {
+import { Mat, Vec } from './linalg.js';
+
+export default class Camera {
     /**
      * Represents a camera!
      * 
@@ -24,8 +26,10 @@ class Camera {
 
     /**
      * Sets the uniform value `projectionMat` for the shader.
+     * 
+     * @param {WebGLRenderingContext} gl The context in which to set the projection matrix.
      */
-    updateGPUProjectionMatrix() {
+    updateGPUProjectionMatrix(gl, program) {
         gl.uniformMatrix4fv(
             gl.getUniformLocation(program, 'projectionMat'),
             false,
@@ -35,8 +39,10 @@ class Camera {
 
     /**
      * Sets the uniform value `cameraPos` for the shader program.
+     * 
+     * @param {WebGLRenderingContext} gl The context in which to set the view matrix.
      */
-    updateGPUViewMatrix() {
+    updateGPUViewMatrix(gl, program) {
         gl.uniformMatrix4fv(
             gl.getUniformLocation(program, 'viewMatrix'),
             false,

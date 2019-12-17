@@ -1,3 +1,7 @@
+import loadProgramFromURLs from './shaders.js';
+import Camera from './camera.js';
+import Mesh from './mesh.js';
+
 var canvas;
 var gl;
 var program;
@@ -15,7 +19,8 @@ function main() {
         return;
     }
 
-    loadProgramFromURLs(
+    const loadProgram = loadProgramFromURLs(
+        gl,
         "../glsl/basic.vert",
         "../glsl/basic.frag"
     ).then((prog) => {
@@ -35,9 +40,10 @@ function initializeScene() {
     gl.depthFunc(gl.LEQUAL);            // Near things obscure far things
 
     camera = new Camera([0,0,5], Math.PI/2, 0.1, 10);
-    camera.updateGPUProjectionMatrix();
+    camera.updateGPUProjectionMatrix(gl, program);
 
     triangle = new Mesh(
+        gl,
         [0, 0, 0],
         [1, 0, 1],
         new Float32Array([ // vertices
@@ -56,9 +62,9 @@ function initializeScene() {
 function drawScene() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    camera.updateGPUViewMatrix();
+    camera.updateGPUViewMatrix(gl, program);
     triangle.rotate(0.01, [0, 1, 0]);
-    triangle.draw();
+    triangle.draw(gl, program);
 
     requestAnimationFrame(drawScene);
 }

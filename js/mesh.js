@@ -1,19 +1,22 @@
-class Mesh {
+import { Mat, Vec } from './linalg.js';
+
+export default class Mesh {
     /**
      * Initialize a 3D object in the world.
      * 
+     * @param {WebGLRenderingContext} gl The graphics context associated with this mesh's buffers.
      * @param {number[]} position the location of the object in world space (vec3)
      * @param {number[]} orientation The direction in world space of the +x axis in object space (vec3)
      * @param {Float32Array} vertices the vertices of the mesh, in object space
+     * @param {Float32Array} normals The vertex normals of the mesh, in object space.
      */
-    constructor(position, orientation, vertices, normals) {
+    constructor(gl, position, orientation, vertices, normals) {
         this.position = Mat.translation(position);
 
         let axis = Vec.cross([1, 0, 0], Vec.normalize(orientation))
         let angle = Math.asin(Vec.norm(axis));
         this.orientation = (angle == 0) ? Mat.identity() : Mat.rotation(angle, axis);
-
-        this.vertices = vertices;
+        this.vertex_count = vertices.length / 3;
 
         this.positionBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
@@ -32,7 +35,7 @@ class Mesh {
         );
     }
 
-    draw() {
+    draw(gl, program) {
         let modelMatrix = this.orientation.mul(this.position);
 
         gl.uniformMatrix4fv(

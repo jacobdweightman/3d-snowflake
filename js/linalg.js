@@ -1,4 +1,4 @@
-class Mat {
+export class Mat {
     /**
      * Represents a matrix!
      * 
@@ -106,7 +106,7 @@ class Mat {
     }
 }
 
-class Vec {
+export class Vec {
     /**
      * Compute the cross product of u and v.
      * @param {number[]} u a 3-vector or homogeneous 4-vector
