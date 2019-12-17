@@ -17,6 +17,7 @@ export default class Mesh {
         let axis = Vec.cross([1, 0, 0], Vec.normalize(orientation))
         let angle = Math.asin(Vec.norm(axis));
         this.orientation = (angle == 0) ? Mat.identity() : Mat.rotation(angle, axis);
+        this.setScale(1, 1, 1);
         this.vertex_count = vertices.length / 3;
         this.face_count = indices.length / 3;
 
@@ -46,7 +47,10 @@ export default class Mesh {
     }
 
     draw(gl, program) {
-        let modelMatrix = this.orientation.mul(this.position);
+        let modelMatrix;
+        modelMatrix = this.position;
+        modelMatrix = this.scale.mul(modelMatrix);
+        modelMatrix = this.orientation.mul(modelMatrix);
         gl.uniformMatrix4fv(
             gl.getUniformLocation(program, 'modelMatrix'),
             false,
@@ -94,6 +98,21 @@ export default class Mesh {
      */
     rotate(angle, axis) {
         this.orientation = Mat.rotation(angle, axis).mul(this.orientation);
+    }
+
+    /**
+     * Sets the overall scale of the mesh.
+     * 
+     * For instance, calling `setScale(1, 2, 3)` will make the mesh twice as wide in the
+     * y direction and 3 times as wide in the z direciton, but leave the y direction
+     * unchanged.
+     * 
+     * @param {number} xScale the factor by which to scale x coordinates of the mesh.
+     * @param {number} yScale the factor by which to scale y coordinates of the mesh.
+     * @param {number} zScale the factor by which to scale z coordinates of the mesh.
+     */
+    setScale(xScale, yScale, zScale) {
+        this.scale = Mat.scale(xScale, yScale, zScale);
     }
 
     /**

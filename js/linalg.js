@@ -56,6 +56,15 @@ export class Mat {
         ])
     }
 
+    static scale(xScale, yScale, zScale) {
+        return new Mat([
+            [xScale, 0, 0, 0],
+            [0, yScale, 0, 0],
+            [0, 0, zScale, 0],
+            [0, 0, 0, 1],
+        ]);
+    }
+
     /**
      * Construct and return a new matrix given by self + B
      * @param {*} B the matrix to add

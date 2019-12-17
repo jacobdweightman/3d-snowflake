@@ -32,6 +32,7 @@ function main() {
     const loadMesh = loadObjAtPath("../assets/cube.obj").then((obj) => {
         const [vertices, normals, faces] = obj;
         mesh = new Mesh(gl, [0,0,0], [1,0,0], vertices, normals, faces);
+        mesh.setScale(2, 1, 1);
     });
 
     Promise.all([loadProgram, loadMesh]).then((values) => {
