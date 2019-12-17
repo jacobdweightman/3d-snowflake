@@ -9,14 +9,16 @@ export default class Mesh {
      * @param {number[]} orientation The direction in world space of the +x axis in object space (vec3)
      * @param {Float32Array} vertices the vertices of the mesh, in object space
      * @param {Float32Array} normals The vertex normals of the mesh, in object space.
+     * @param {Float32Array} indices The vertex indices that define the faces of the mesh.
      */
-    constructor(gl, position, orientation, vertices, normals) {
+    constructor(gl, position, orientation, vertices, normals, indices) {
         this.position = Mat.translation(position);
 
         let axis = Vec.cross([1, 0, 0], Vec.normalize(orientation))
         let angle = Math.asin(Vec.norm(axis));
         this.orientation = (angle == 0) ? Mat.identity() : Mat.rotation(angle, axis);
         this.vertex_count = vertices.length / 3;
+        this.face_count = indices.length / 3;
 
         this.positionBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
@@ -33,17 +35,26 @@ export default class Mesh {
             normals,
             gl.STATIC_DRAW
         );
+
+        this.indexBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+        gl.bufferData(
+            gl.ELEMENT_ARRAY_BUFFER,
+            indices,
+            gl.STATIC_DRAW
+        );
     }
 
     draw(gl, program) {
         let modelMatrix = this.orientation.mul(this.position);
-
         gl.uniformMatrix4fv(
             gl.getUniformLocation(program, 'modelMatrix'),
             false,
             modelMatrix.convertForGPU()
         );
         
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+
         gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
         gl.vertexAttribPointer(
             gl.getAttribLocation(program, 'vertexMeshPos'),
@@ -72,7 +83,7 @@ export default class Mesh {
         );
         gl.enableVertexAttribArray(gl.getAttribLocation(program, 'vertexNormal'));
 
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 3);
+        gl.drawElements(gl.TRIANGLES, this.face_count * 3, gl.UNSIGNED_SHORT, 0);
     }
 
     /**

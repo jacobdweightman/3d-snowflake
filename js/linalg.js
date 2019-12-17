@@ -171,4 +171,36 @@ export class Vec {
 
         return u;
     }
+
+    /**
+     * Computes the sum of two vectors.
+     * 
+     * @param {number[]} u 
+     * @param {number[]} v 
+     */
+    static add(u, v) {
+        let w = new Array(u.length);
+
+        for(let i=0; i<u.length; i++) {
+            w[i] = u[i] + v[i];
+        }
+
+        return w;
+    }
+
+    /**
+     * Computes the difference of two vectors. u - v is a vector that points from v to u.
+     * 
+     * @param {number[]} u 
+     * @param {number[]} v 
+     */
+    static sub(u, v) {
+        let w = new Array(u.length);
+
+        for(let i=0; i<u.length; i++) {
+            w[i] = u[i] - v[i];
+        }
+
+        return w;
+    }
 }
