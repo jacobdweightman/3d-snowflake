@@ -45,8 +45,12 @@ export class Mat {
      * @param {number[]} v a vector that defines the axis of rotation (vec3)
      */
     static rotation(theta, v) {
-        const vp = Vec.scale(Vec.normalize(v), Math.sin(theta/2));
-        const u = [Math.cos(theta/2), vp[0], vp[1], vp[2]];
+        try {
+            const vp = Vec.scale(Vec.normalize(v), Math.sin(theta/2));
+            var u = [Math.cos(theta/2), vp[0], vp[1], vp[2]];
+        } catch (error) {
+            return this.identity();
+        }
 
         return new Mat([
             [1 - 2*(u[2]*u[2] + u[3]*u[3]),  2*(u[1]*u[2] - u[3]*u[0]),     2*(u[1]*u[3] + u[2]*u[0]),     0],
@@ -54,6 +58,17 @@ export class Mat {
             [2*(u[1]*u[3] - u[2]*u[0]),      2*(u[2]*u[3] + u[1]*u[0]),     1 - 2*(u[1]*u[1] + u[2]*u[2]), 0],
             [0,                              0,                         0,                                 1],
         ])
+    }
+
+    /**
+     * Constructs a 3d rotation matrix which rotates from the old axis to the new axis.
+     * 
+     * @param {number[]} oldAxis The orientation of an axis after the rotation
+     * @param {number[]} newAxis The orientation of an axis after the rotation
+     */
+    static rotateTo(oldAxis, newAxis) {
+        const crs = Vec.cross(Vec.normalize(oldAxis), Vec.normalize(newAxis));
+        return this.rotation(Vec.norm(crs), crs);
     }
 
     static scale(xScale, yScale, zScale) {
@@ -100,6 +115,20 @@ export class Mat {
         }
 
         return new Mat(C);
+    }
+
+    /**
+     * Operates on the given vector with this. That is, computes this * v.
+     * @param {number[]} v The vector to operate on
+     */
+    operateOn(v) {
+        let u = new Array(v.length);
+
+        for(let i=0; i<v.length; i++) {
+            u[i] = Vec.dot(this.entries[i], v);
+        }
+
+        return u;
     }
 
     convertForGPU() {
@@ -163,7 +192,12 @@ export class Vec {
      * @param {number[]} v 
      */
     static normalize(v) {
-        return this.scale(v, 1/this.norm(v));
+        const len = this.norm(v);
+        if(len === 0) {
+            throw "Cannot normalize the zero vector!";
+        } else {
+            return this.scale(v, 1/this.norm(v));
+        }
     }
 
     /**

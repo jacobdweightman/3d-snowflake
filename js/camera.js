@@ -12,6 +12,7 @@ export default class Camera {
     constructor(position, fieldOfView, near, far) {
         this.position = new Float32Array(4);
         this.position.set(position);
+        this.orientation = [0, 0, -1];
 
         let f = 1.0 / Math.tan(0.5*fieldOfView);
         let r = 1 / (near - far);
@@ -22,6 +23,25 @@ export default class Camera {
             0, 0, (far+near)*r, -1,
             0, 0, 2*far*near*r, 0,
         ]);
+    }
+
+    /**
+     * Rotates the camera by the given angle about the given axis.
+     * 
+     * @param {number} angle The angle to rotate by, measured counterclockwise in radians.
+     * @param {number[]} axis The axis to rotate about.
+     */
+    rotate(angle, axis) {
+        this.orientation = Mat.rotation(angle, axis).operateOn(this.orientation);
+    }
+
+    /**
+     * Rotate the camera to point towards a specified point.
+     * 
+     * @param {*} target the point to look at.
+     */
+    lookAt(target) {
+        this.orientation = Vec.sub(target, this.position);
     }
 
     /**
@@ -43,10 +63,14 @@ export default class Camera {
      * @param {WebGLRenderingContext} gl The context in which to set the view matrix.
      */
     updateGPUViewMatrix(gl, program) {
+        let viewMatrix = Mat.identity();
+        viewMatrix = Mat.translation(Vec.scale(this.position, -1)).mul(viewMatrix);
+        viewMatrix = Mat.rotateTo(this.orientation, [0,0,-1]).mul(viewMatrix);
+
         gl.uniformMatrix4fv(
             gl.getUniformLocation(program, 'viewMatrix'),
             false,
-            Mat.translation(Vec.scale(this.position, -1)).convertForGPU()
+            viewMatrix.convertForGPU()
         )
     }
 }

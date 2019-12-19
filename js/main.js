@@ -49,7 +49,7 @@ function initializeScene() {
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
 
-    camera = new Camera([0,0,5], Math.PI/2, 0.1, 10);
+    camera = new Camera([0,0,5], Math.PI/2, 0.1, 20);
     camera.updateGPUProjectionMatrix(gl, program);
 }
 
@@ -61,4 +61,18 @@ function drawScene() {
     mesh.draw(gl, program);
 
     requestAnimationFrame(drawScene);
+}
+
+window.onkeydown = function(event) {
+    switch(event.key) {
+        case "ArrowLeft":
+            camera.position[0] -= 1;
+            camera.lookAt([0,0,0]);
+            console.log(camera);
+            break;
+        case "ArrowRight":
+            camera.position[0] += 1;
+            camera.lookAt([0,0,0]);
+            break;
+    }
 }
