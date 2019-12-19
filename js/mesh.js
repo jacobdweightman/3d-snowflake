@@ -5,13 +5,15 @@ export default class Mesh {
      * Initialize a 3D object in the world.
      * 
      * @param {WebGLRenderingContext} gl The graphics context associated with this mesh's buffers.
+     * @param {WebGLProgram} program The shader program to be used to render this mesh.
      * @param {number[]} position the location of the object in world space (vec3)
      * @param {number[]} orientation The direction in world space of the +x axis in object space (vec3)
      * @param {Float32Array} vertices the vertices of the mesh, in object space
      * @param {Float32Array} normals The vertex normals of the mesh, in object space.
      * @param {Float32Array} indices The vertex indices that define the faces of the mesh.
      */
-    constructor(gl, position, orientation, vertices, normals, indices) {
+    constructor(gl, program, position, orientation, vertices, normals, indices) {
+        this.program = program;
         this.position = Mat.translation(position);
 
         let axis = Vec.cross([1, 0, 0], Vec.normalize(orientation))
@@ -46,13 +48,24 @@ export default class Mesh {
         );
     }
 
-    draw(gl, program) {
+    /**
+     * Draw this mesh to the given GL context.
+     * 
+     * @param {WebGLRenderingContext} gl The GL context in which to draw this mesh.
+     * @param {Camera} camera Draw this mesh from this camera's point of view.
+     */
+    draw(gl, camera) {
+        gl.useProgram(this.program);
+
+        camera.updateGPUProjectionMatrix(gl, this.program);
+        camera.updateGPUViewMatrix(gl, this.program);
+
         let modelMatrix;
         modelMatrix = this.position;
         modelMatrix = this.scale.mul(modelMatrix);
         modelMatrix = this.orientation.mul(modelMatrix);
         gl.uniformMatrix4fv(
-            gl.getUniformLocation(program, 'modelMatrix'),
+            gl.getUniformLocation(this.program, 'modelMatrix'),
             false,
             modelMatrix.convertForGPU()
         );
@@ -61,31 +74,31 @@ export default class Mesh {
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
         gl.vertexAttribPointer(
-            gl.getAttribLocation(program, 'vertexMeshPos'),
+            gl.getAttribLocation(this.program, 'vertexMeshPos'),
             3,
             gl.FLOAT,
             true,
             0,
             0
         );
-        gl.enableVertexAttribArray(gl.getAttribLocation(program, 'vertexMeshPos'));
+        gl.enableVertexAttribArray(gl.getAttribLocation(this.program, 'vertexMeshPos'));
 
         gl.uniformMatrix3fv(
-            gl.getUniformLocation(program, 'normalMatrix'),
+            gl.getUniformLocation(this.program, 'normalMatrix'),
             false,
             normalMatrixFromModelMatrix(modelMatrix).convertForGPU()
         );
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
         gl.vertexAttribPointer(
-            gl.getAttribLocation(program, 'vertexNormal'),
+            gl.getAttribLocation(this.program, 'vertexNormal'),
             3,
             gl.FLOAT,
             true,
             0,
             0
         );
-        gl.enableVertexAttribArray(gl.getAttribLocation(program, 'vertexNormal'));
+        gl.enableVertexAttribArray(gl.getAttribLocation(this.program, 'vertexNormal'));
 
         gl.drawElements(gl.TRIANGLES, this.face_count * 3, gl.UNSIGNED_SHORT, 0);
     }

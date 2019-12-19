@@ -5,7 +5,6 @@ import Mesh from './mesh.js';
 
 var canvas;
 var gl;
-var program;
 
 // TODO: encapsulate this better
 var camera;
@@ -20,22 +19,13 @@ function main() {
         return;
     }
 
-    const loadProgram = loadProgramFromURLs(
-        gl,
+    loadMesh(
+        "../assets/snowflake.obj",
         "../glsl/basic.vert",
         "../glsl/basic.frag"
-    ).then((prog) => {
-        program = prog;
-        gl.useProgram(prog);
-    });
-
-    const loadMesh = loadObjAtPath("../assets/snowflake.obj").then((obj) => {
-        const [vertices, normals, faces] = obj;
-        mesh = new Mesh(gl, [0,0,0], [1,0,0], vertices, normals, faces);
+    ).then((loadedMesh) => {
+        mesh = loadedMesh;
         mesh.setScale(0.01, 0.01, 0.01);
-    });
-
-    Promise.all([loadProgram, loadMesh]).then((values) => {
         initializeScene();
         requestAnimationFrame(drawScene);
     });
@@ -50,15 +40,13 @@ function initializeScene() {
     gl.depthFunc(gl.LEQUAL);
 
     camera = new Camera([0,0,5], Math.PI/2, 0.1, 20);
-    camera.updateGPUProjectionMatrix(gl, program);
 }
 
 function drawScene() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    camera.updateGPUViewMatrix(gl, program);
     mesh.rotate(0.01, [0, 1, 0]);
-    mesh.draw(gl, program);
+    mesh.draw(gl, camera);
 
     requestAnimationFrame(drawScene);
 }
@@ -75,4 +63,19 @@ window.onkeydown = function(event) {
             camera.lookAt([0,0,0]);
             break;
     }
+}
+
+function loadMesh(objPath, vertPath, fragPath) {
+    const loadProgram = loadProgramFromURLs(
+        gl,
+        vertPath,
+        fragPath
+    );
+
+    const loadMesh = loadObjAtPath(objPath);
+
+    return Promise.all([loadProgram, loadMesh]).then((values) => {
+        const [prog, [vertices, normals, faces]] = values;
+        return new Mesh(gl, prog, [0,0,0], [1,0,0], vertices, normals, faces);
+    });
 }
