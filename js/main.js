@@ -2,6 +2,7 @@ import loadProgramFromURLs from './shaders.js';
 import loadObjAtPath from './obj.js';
 import Camera from './camera.js';
 import Mesh from './mesh.js';
+import Skybox from './skybox.js';
 
 var canvas;
 var gl;
@@ -9,6 +10,7 @@ var gl;
 // TODO: encapsulate this better
 var camera;
 var mesh;
+var skybox;
 
 function main() {
     canvas = document.getElementById("glCanvas");
@@ -19,13 +21,20 @@ function main() {
         return;
     }
 
-    loadMesh(
+    const lm = loadMesh(
         "../assets/snowflake.obj",
         "../glsl/basic.vert",
         "../glsl/basic.frag"
     ).then((loadedMesh) => {
         mesh = loadedMesh;
         mesh.setScale(0.01, 0.01, 0.01);
+    });
+
+    const sb = Skybox.load(gl, "../assets/shawfield.jpg").then((sb) => {
+        skybox = sb;
+    });
+
+    Promise.all([lm, sb]).then(() => {
         initializeScene();
         requestAnimationFrame(drawScene);
     });
@@ -45,6 +54,7 @@ function initializeScene() {
 function drawScene() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+    skybox.draw(gl, camera);
     mesh.rotate(0.01, [0, 1, 0]);
     mesh.draw(gl, camera);
 
