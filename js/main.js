@@ -70,14 +70,17 @@ function drawScene() {
     requestAnimationFrame(drawScene);
 }
 
+var angle = -Math.PI/2;
 window.onkeydown = function(event) {
     switch(event.key) {
         case "ArrowLeft":
-            camera.position[0] -= 1;
+            angle += Math.PI / 72;
+            camera.position = [5*Math.cos(angle), 0, 5*this.Math.sin(angle)];
             camera.lookAt([0,0,0]);
             break;
         case "ArrowRight":
-            camera.position[0] += 1;
+            angle -= Math.PI / 72;
+            camera.position = [5*Math.cos(angle), 0, 5*this.Math.sin(angle)];
             camera.lookAt([0,0,0]);
             break;
     }

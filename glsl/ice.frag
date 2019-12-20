@@ -6,11 +6,11 @@ varying vec3 position;
 varying vec3 normal;
 
 // environment properties
-vec3 lightDirection = vec3(0.0, 0.0, -1.0);
+vec3 lightDirection = vec3(1.0, 0.0, -1.0);
 
 // material properties
-float eta = 0.67;
-float R0 = 0.4;
+float eta = 0.76;
+float R0 = 0.017;
 
 float shlickApproximation(float EdotH) {
     return R0 + (1.0 - R0)*pow(1.0-EdotH, 5.0);
