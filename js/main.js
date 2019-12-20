@@ -56,7 +56,8 @@ function initializeScene() {
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
 
-    camera = new Camera([0,0,5], Math.PI/2, 0.1, 20);
+    camera = new Camera([0,0,-5], Math.PI/2, 0.1, 100);
+    camera.orientation = [0, 0, 1];
 }
 
 function drawScene() {

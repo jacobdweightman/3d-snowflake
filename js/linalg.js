@@ -67,8 +67,15 @@ export class Mat {
      * @param {number[]} newAxis The orientation of an axis after the rotation
      */
     static rotateTo(oldAxis, newAxis) {
-        const crs = Vec.cross(Vec.normalize(oldAxis), Vec.normalize(newAxis));
-        return this.rotation(Vec.norm(crs), crs);
+        let crs = Vec.cross(oldAxis, newAxis);
+        const lengthSinAngle = Vec.norm(crs);
+        const angle = Math.atan2(lengthSinAngle, Vec.dot(oldAxis, newAxis));
+
+        // If the axes are anti/parallel, the rotation axis is a zero vector!
+        if(lengthSinAngle === 0) {
+            crs = [0, 1, 0]; // Any nonzero axis will do!
+        }
+        return this.rotation(angle, crs);
     }
 
     static scale(xScale, yScale, zScale) {
