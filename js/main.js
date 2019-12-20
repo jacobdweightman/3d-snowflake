@@ -23,8 +23,8 @@ function main() {
 
     const lm = loadMesh(
         "../assets/snowflake.obj",
-        "../glsl/basic.vert",
-        "../glsl/basic.frag"
+        "../glsl/ice.vert",
+        "../glsl/ice.frag"
     ).then((loadedMesh) => {
         mesh = loadedMesh;
         mesh.setScale(0.01, 0.01, 0.01);
