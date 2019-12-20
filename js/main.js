@@ -30,7 +30,15 @@ function main() {
         mesh.setScale(0.01, 0.01, 0.01);
     });
 
-    const sb = Skybox.load(gl, "../assets/shawfield.jpg").then((sb) => {
+    const sb = Skybox.load(
+        gl,
+        "../assets/shaw_north.jpg",
+        "../assets/shaw_east.jpg",
+        "../assets/shaw_south.jpg",
+        "../assets/shaw_west.jpg",
+        "../assets/shaw_up.jpg",
+        "../assets/shaw_down.jpg"
+    ).then((sb) => {
         skybox = sb;
     });
 
@@ -66,7 +74,6 @@ window.onkeydown = function(event) {
         case "ArrowLeft":
             camera.position[0] -= 1;
             camera.lookAt([0,0,0]);
-            console.log(camera);
             break;
         case "ArrowRight":
             camera.position[0] += 1;

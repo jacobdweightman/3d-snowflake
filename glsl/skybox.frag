@@ -1,10 +1,9 @@
 precision highp float;
 
-uniform sampler2D texSampler;
+uniform samplerCube texSampler;
 
-varying vec3 position;
-varying vec2 texCoord;
+varying vec3 texCoord;
 
 void main() {
-    gl_FragColor = texture2D(texSampler, texCoord);
+    gl_FragColor = textureCube(texSampler, texCoord);
 }

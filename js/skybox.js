@@ -12,18 +12,25 @@ export default class Skybox {
      * @param {string} texturePath The path of the texture to be applied to this skybox.
      * @returns {Promise<Skybox>} A promise of the Skybox.
      */
-    static load(gl, texturePath) {
+    static load(gl, northTexPath, eastTexPath, southTexPath, westTexPath, upTexPath, downTexPath) {
         let loadProg = loadProgramFromURLs(
             gl,
             "../glsl/skybox.vert",
             "../glsl/skybox.frag"
         );
 
-        let loadTex = loadImage(texturePath);
+        let loadTex = [
+            northTexPath,
+            eastTexPath,
+            southTexPath,
+            westTexPath,
+            upTexPath, 
+            downTexPath
+        ].map(loadImage);
 
-        return Promise.all([loadProg, loadTex]).then((values) => {
-            const [program, texture] = values;
-            return new Skybox(gl, program, texture);
+        return Promise.all([loadProg, ...loadTex]).then((values) => {
+            const [program, ...texture] = values;
+            return new Skybox(gl, program, ...texture);
         });
     }
 
@@ -32,13 +39,33 @@ export default class Skybox {
      * 
      * @param {WebGLRenderingContext} gl 
      * @param {WebGLProgram} program 
-     * @param {HTMLImageElement} texture 
+     * @param {HTMLImageElement} northTex 
+     * @param {HTMLImageElement} eastTex 
+     * @param {HTMLImageElement} southTex 
+     * @param {HTMLImageElement} westTex 
+     * @param {HTMLImageElement} upTex 
+     * @param {HTMLImageElement} downTex 
      */
-    constructor(gl, program, texture) {
+    constructor(gl, program, northTex, eastTex, southTex, westTex, upTex, downTex) {
         this.program = program;
 
         const vertices = new Float32Array([
+            1, 1, 1,
+            -1, 1, 1,
+            1, 1, -1,
             -1, 1, -1,
+            -1, -1, -1,
+            -1, 1, 1,
+            -1, -1, 1,
+            1, 1, 1,
+            1, -1, 1,
+            1, 1, -1,
+            1, -1, -1,
+            -1, -1, -1,
+            1, -1, 1,
+            -1, -1, 1,
+
+            /*-1, 1, -1,
             -1, -1, -1,
             1, 1, -1,
             1, -1, -1,
@@ -47,43 +74,25 @@ export default class Skybox {
             -1, 1, 1,
             -1, -1, 1,
             -1, 1, -1,
-            -1, -1, -1,
+            -1, -1, -1,*/
         ])
         this.positionBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
         this.vertexCount = vertices.length / 3;
 
-        const texCoords = new Float32Array([
-            0, 0,
-            0, 1,
-            0.25, 0,
-            0.25, 1,
-            0.5, 0,
-            0.5, 1,
-            0.75, 0,
-            0.75, 1,
-            1, 0,
-            1, 1,
-        ]);
-        this.textureCoordsBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.textureCoordsBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, texCoords, gl.STATIC_DRAW);
-
         this.texture = gl.createTexture();
-        gl.bindTexture(gl.TEXTURE_2D, this.texture);
-        gl.texImage2D(
-            gl.TEXTURE_2D,
-            0,
-            gl.RGBA,
-            gl.RGBA,
-            gl.UNSIGNED_BYTE,
-            texture
-        );
+        gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture);
+        gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, northTex);
+        gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, eastTex);
+        gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Z, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, southTex);
+        gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_X, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, westTex);
+        gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_Y, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, upTex);
+        gl.texImage2D(gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, downTex);
         
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     }
 
     draw(gl, camera) {
@@ -103,19 +112,8 @@ export default class Skybox {
         );
         gl.enableVertexAttribArray(gl.getAttribLocation(this.program, 'vertexMeshPos'));
 
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.textureCoordsBuffer);
-        gl.vertexAttribPointer(
-            gl.getAttribLocation(this.program, 'vertexTexCoord'),
-            2,
-            gl.FLOAT,
-            true,
-            0,
-            0
-        );
-        gl.enableVertexAttribArray(gl.getAttribLocation(this.program, 'vertexTexCoord'));
-
         gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, this.texture);
+        gl.bindTexture(gl.TEXTURE_CUBE_MAP, this.texture);
         gl.uniform1i(gl.getUniformLocation(this.program, 'texSampler'), 0);
 
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vertexCount);

@@ -1,11 +1,9 @@
 attribute vec4 vertexMeshPos;
-attribute vec2 vertexTexCoord;
 
 uniform mat4 projectionMat;
 uniform mat4 viewMatrix;
 
-varying vec3 position;
-varying vec2 texCoord;
+varying vec3 texCoord;
 
 void main() {
     // No model matrix, since the skybox doesn't move
@@ -15,6 +13,5 @@ void main() {
     // Replace z with w so that anything not clipped is in front of the skybox.
     gl_Position = vertexCameraPos.xyww;
 
-    position = position.xyz;
-    texCoord = vertexTexCoord;
+    texCoord = vertexMeshPos.xyz;
 }
