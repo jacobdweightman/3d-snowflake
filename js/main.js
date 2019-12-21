@@ -22,9 +22,9 @@ function main() {
     }
 
     const lm = loadMesh(
-        "../assets/snowflake.obj",
-        "../glsl/ice.vert",
-        "../glsl/ice.frag"
+        "./assets/snowflake.obj",
+        "./glsl/ice.vert",
+        "./glsl/ice.frag"
     ).then((loadedMesh) => {
         mesh = loadedMesh;
         mesh.setScale(0.01, 0.01, 0.01);
@@ -32,12 +32,12 @@ function main() {
 
     const sb = Skybox.load(
         gl,
-        "../assets/shaw_north.jpg",
-        "../assets/shaw_east.jpg",
-        "../assets/shaw_south.jpg",
-        "../assets/shaw_west.jpg",
-        "../assets/shaw_up.jpg",
-        "../assets/shaw_down.jpg"
+        "./assets/shaw_north.jpg",
+        "./assets/shaw_east.jpg",
+        "./assets/shaw_south.jpg",
+        "./assets/shaw_west.jpg",
+        "./assets/shaw_up.jpg",
+        "./assets/shaw_down.jpg"
     ).then((sb) => {
         skybox = sb;
     });

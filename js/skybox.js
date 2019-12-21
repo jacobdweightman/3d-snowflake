@@ -15,8 +15,8 @@ export default class Skybox {
     static load(gl, northTexPath, eastTexPath, southTexPath, westTexPath, upTexPath, downTexPath) {
         let loadProg = loadProgramFromURLs(
             gl,
-            "../glsl/skybox.vert",
-            "../glsl/skybox.frag"
+            "./glsl/skybox.vert",
+            "./glsl/skybox.frag"
         );
 
         let loadTex = [
@@ -64,17 +64,6 @@ export default class Skybox {
             -1, -1, -1,
             1, -1, 1,
             -1, -1, 1,
-
-            /*-1, 1, -1,
-            -1, -1, -1,
-            1, 1, -1,
-            1, -1, -1,
-            1, 1, 1,
-            1, -1, 1,
-            -1, 1, 1,
-            -1, -1, 1,
-            -1, 1, -1,
-            -1, -1, -1,*/
         ])
         this.positionBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
